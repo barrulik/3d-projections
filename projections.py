@@ -5,21 +5,22 @@ import json
 
 WHITE = (255, 255, 255)
 BLACK = (0, 0, 0)
+RAINBOW = (0, 0, 0)
+rainbow = True
 
 WIDTH, HEIGHT = 800, 600
 #WIDTH, HEIGHT = 1600, 900
-screen = pygame.display.set_mode((WIDTH, HEIGHT))
 scaling = 100
 
-angle = 0
 
-projection_matrix = np.matrix([
-    [1, 0, 0],
-    [0, 1, 0]
-])
 
-def drawLine(point1, point2):
-    pygame.draw.line(
+
+def drawLine(point1, point2, screen):
+    if rainbow:
+        pygame.draw.line(
+        screen, RAINBOW, (point1[0], point1[1]), (point2[0], point2[1]))
+    else:
+        pygame.draw.line(
         screen, BLACK, (point1[0], point1[1]), (point2[0], point2[1]))
 
 def rotateX(angle):
@@ -48,7 +49,7 @@ def projectPoint(point, angle):
     rotated = np.dot(rotateY(angle), rotated)
     rotated = np.dot(rotateZ(angle), rotated)
 
-    projected = np.dot(projection_matrix, rotated)
+    projected = np.dot(np.matrix([[1, 0, 0],[0, 1, 0]]), rotated)
 
     
     x = int(projected[0][0] * scaling) + WIDTH/2
@@ -56,8 +57,9 @@ def projectPoint(point, angle):
     return [x, y]
 
 
-def drawlinesAndProject(angle):
-    f = open('config.json')
+
+def render(file_path, point, angle, scaling, screen):
+    f = open(file_path)
     data = json.load(f)
     points = data.get("points")
     lines = data.get("lines")
@@ -70,10 +72,14 @@ def drawlinesAndProject(angle):
         p2 = np.matrix(p2)
         p1 = projectPoint(p1, angle)
         p2 = projectPoint(p2, angle)
-        drawLine(p1, p2)
+        drawLine(p1, p2, screen)
 
 
+
+
+screen = pygame.display.set_mode((WIDTH, HEIGHT))
 clock = pygame.time.Clock()
+angle = 0
 while True:
     # so spin rate is not super fast/constant
     clock.tick(60)
@@ -81,10 +87,11 @@ while True:
         if event.type == pygame.QUIT:
             pygame.quit()
             exit()
-    
 
-    
+    angle+= 0.01
     screen.fill(WHITE)
-    angle += 0.01
-    drawlinesAndProject(angle)
+
+    render("quad_pyramid.json", [WIDTH/2, HEIGHT/2], angle, scaling, screen)
+    render("square.json", [WIDTH/2, HEIGHT/2], angle/2, scaling, screen)
+
     pygame.display.update()
