@@ -1,6 +1,7 @@
 import pygame
 import numpy as np
 from math import *
+import json
 
 WHITE = (255, 255, 255)
 BLACK = (0, 0, 0)
@@ -12,34 +13,10 @@ scaling = 100
 
 angle = 0
 
-points = []
-points.append(np.matrix([0, 0,2]))
-points.append(np.matrix([1, 1, -1]))
-points.append(np.matrix([-1,  1, -1]))
-points.append(np.matrix([-1, -1, -1]))
-points.append(np.matrix([1, -1, -1]))
-
-
-# cube
-# points.append(np.matrix([-1, -1, 1]))
-# points.append(np.matrix([1, -1, 1]))
-# points.append(np.matrix([1,  1, 1]))
-# points.append(np.matrix([-1, 1, 1]))
-# points.append(np.matrix([-1, -1, -1]))
-# points.append(np.matrix([1, -1, -1]))
-# points.append(np.matrix([1, 1, -1]))
-# points.append(np.matrix([-1, 1, -1]))
-
-
 projection_matrix = np.matrix([
     [1, 0, 0],
     [0, 1, 0]
 ])
-
-
-projectedPoints = [
-    [n, n] for n in range(len(points))
-]
 
 def drawLine(point1, point2):
     pygame.draw.line(
@@ -66,9 +43,10 @@ def rotateZ(angle):
 
 def projectPoint(point, angle):
     rotated = point.reshape(3, 1)
-    #rotated = np.dot(rotateY(angle), rotated)
-    rotated = np.dot(rotateZ(angle), rotated)
     rotated = np.dot(rotateX(pi/2), rotated)
+    rotated = np.dot(rotateX(angle), rotated)
+    rotated = np.dot(rotateY(angle), rotated)
+    rotated = np.dot(rotateZ(angle), rotated)
 
     projected = np.dot(projection_matrix, rotated)
 
@@ -77,7 +55,24 @@ def projectPoint(point, angle):
     y = int(projected[1][0] * scaling) + HEIGHT/2
     return [x, y]
 
-    
+
+def drawlinesAndProject(angle):
+    f = open('config.json')
+    data = json.load(f)
+    points = data.get("points")
+    lines = data.get("lines")
+    for line in lines:
+        for l in line:
+            p1 = l
+        p2 = points.get(line.get(p1))
+        p1 = points.get(p1)
+        p1 = np.matrix(p1)
+        p2 = np.matrix(p2)
+        p1 = projectPoint(p1, angle)
+        p2 = projectPoint(p2, angle)
+        drawLine(p1, p2)
+
+
 clock = pygame.time.Clock()
 while True:
     # so spin rate is not super fast/constant
@@ -88,16 +83,8 @@ while True:
             exit()
     
 
-
-    angle += 0.01
+    
     screen.fill(WHITE)
-    # drawining stuff
-
-    for i in range(len(points)):
-        projectedPoints[i] = projectPoint(points[i], angle)
-
-    for j in range(len(projectedPoints)):
-        for k in range(j+1, len(projectedPoints)):
-            drawLine(projectedPoints[j], projectedPoints[k])
-
+    angle += 0.01
+    drawlinesAndProject(angle)
     pygame.display.update()
