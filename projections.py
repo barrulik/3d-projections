@@ -9,8 +9,8 @@ RAINBOW = (0, 0, 0)
 rainbow = True
 
 WIDTH, HEIGHT = 800, 600
-# WIDTH, HEIGHT = 1600, 900
-scaling = 100
+#WIDTH, HEIGHT = 1600, 900
+scale = 100
 
 
 def drawLine(point1, point2, screen):
@@ -44,7 +44,7 @@ def rotateZ(angle):
     ])
 
 
-def projectPoint(point, angle):
+def projectPoint(point, angle, offset):
     rotated = point.reshape(3, 1)
     rotated = np.dot(rotateX(pi / 2), rotated)
     rotated = np.dot(rotateX(angle), rotated)
@@ -53,25 +53,33 @@ def projectPoint(point, angle):
 
     projected = np.dot(np.matrix([[1, 0, 0], [0, 1, 0]]), rotated)
 
-    x = int(projected[0][0] * scaling) + WIDTH / 2
-    y = int(projected[1][0] * scaling) + HEIGHT / 2
+    x = int(projected[0][0] * scale) + WIDTH/2
+    y = int(projected[1][0] * scale) + HEIGHT/2
     return [x, y]
 
 
-def renderObject(file_path, point, angle, scaling, screen):
+def renderObject(file_path, offset, angle, scale, screen):
+    # rounding offset
+    offset[0] = round(offset[0]/scale*100)/100
+    offset[1] = round(offset[1]/scale*100)/100
+    offset[2] = round(offset[2]/scale*100)/100
+    
+    
     f = open(file_path)
     data = json.load(f)
     points = data.get("points")
+    temp = ""
+    for pointName in points:
+        point = points.get(pointName)
+        point = np.matrix(point)+np.matrix([offset])
+        temp += '"'+pointName+'":'+str(projectPoint(point, angle, offset))+','
+    projectedPoints = json.loads('{'+temp[:-1]+'}')
     lines = data.get("lines")
     for line in lines:
-        for l in line:
-            p1 = l
-        p2 = points.get(line.get(p1))
-        p1 = points.get(p1)
-        p1 = np.matrix(p1)
-        p2 = np.matrix(p2)
-        p1 = projectPoint(p1, angle)
-        p2 = projectPoint(p2, angle)
+        for p1name in line:
+            p1 = p1name
+        p2 = projectedPoints.get(line.get(p1))
+        p1 = projectedPoints.get(p1)
         drawLine(p1, p2, screen)
 
 
@@ -89,7 +97,8 @@ while True:
     angle += 0.01
     screen.fill(WHITE)
 
-    renderObject("objects/quad_pyramid.json", [WIDTH / 2, HEIGHT / 2], angle, scaling, screen)
-    #renderObject("objects/cube.json", [WIDTH / 2, HEIGHT / 2], angle, scaling, screen)
+    renderObject("objects/quad_pyramid.json", [0, 0, 200], angle, scale, screen)
+    renderObject("objects/cube.json", [0, 0, 0], angle, scale, screen)
+
 
     pygame.display.update()
