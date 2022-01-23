@@ -47,9 +47,9 @@ def rotateZ(angle):
 def projectPoint(point, angle, offset):
     rotated = point.reshape(3, 1)
     rotated = np.dot(rotateX(pi / 2), rotated)
-    rotated = np.dot(rotateX(angle), rotated)
-    rotated = np.dot(rotateY(angle), rotated)
-    rotated = np.dot(rotateZ(angle), rotated)
+    rotated = np.dot(rotateX(angle[0]), rotated)
+    rotated = np.dot(rotateY(angle[1]), rotated)
+    rotated = np.dot(rotateZ(angle[2]), rotated)
 
     projected = np.dot(np.matrix([[1, 0, 0], [0, 1, 0]]), rotated)
 
@@ -97,8 +97,7 @@ while True:
     angle += 0.01
     screen.fill(WHITE)
 
-    renderObject("objects/quad_pyramid.json", [0, 0, 200], angle, scale, screen)
-    renderObject("objects/cube.json", [0, 0, 0], angle, scale, screen)
+    renderObject("objects/cube.json", [0, 0, 0], [angle, angle, angle], scale, screen)
 
 
     pygame.display.update()
