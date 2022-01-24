@@ -97,8 +97,13 @@ while True:
     angle += 0.01
     screen.fill(WHITE)
 
+
+#   type ur code here
+
     renderObject("objects/2squares.json", [0, 0, 0], [angle, angle, angle], scale, screen)
     renderObject("objects/square.json", [0, 0, 1], [angle, angle, angle], scale, screen)
+
+
 
 
     pygame.display.update()
