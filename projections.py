@@ -10,7 +10,6 @@ rainbow = True
 
 WIDTH, HEIGHT = 800, 600
 #WIDTH, HEIGHT = 1600, 900
-scale = 100
 
 
 def drawLine(point1, point2, screen):
@@ -100,8 +99,8 @@ while True:
 
 #   type ur code here
 
-    renderObject("objects/2squares.json", [0, 0, 0], [angle, angle, angle], scale, screen)
-    renderObject("objects/square.json", [0, 0, 1], [angle, angle, angle], scale, screen)
+    renderObject("objects/2squares.json", [0, 0, 0], [angle, angle, angle], 100, screen)
+    renderObject("objects/square.json", [0, 0, 1], [angle, angle, angle], 100, screen)
 
 
 
