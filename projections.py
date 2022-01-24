@@ -44,7 +44,7 @@ def rotateZ(angle):
     ])
 
 
-def projectPoint(point, angle, offset):
+def projectPoint(point, angle, offset, scale):
     rotated = point.reshape(3, 1)
     rotated = np.dot(rotateX(pi / 2), rotated)
     rotated = np.dot(rotateX(angle[0]), rotated)
@@ -58,29 +58,29 @@ def projectPoint(point, angle, offset):
     return [x, y]
 
 
-def renderObject(file_path, offset, angle, scale, screen):
-    # rounding offset
-    offset[0] = round(offset[0]/scale*100)/100
-    offset[1] = round(offset[1]/scale*100)/100
-    offset[2] = round(offset[2]/scale*100)/100
-    
-    
-    f = open(file_path)
+def renderObject(objectPath, offset, angle, scale, screen):
+    f = open(objectPath)
     data = json.load(f)
     points = data.get("points")
-    temp = ""
-    for pointName in points:
-        point = points.get(pointName)
-        point = np.matrix(point)+np.matrix([offset])
-        temp += '"'+pointName+'":'+str(projectPoint(point, angle, offset))+','
-    projectedPoints = json.loads('{'+temp[:-1]+'}')
-    lines = data.get("lines")
-    for line in lines:
-        for p1name in line:
-            p1 = p1name
-        p2 = projectedPoints.get(line.get(p1))
-        p1 = projectedPoints.get(p1)
-        drawLine(p1, p2, screen)
+    if points:
+        temp = ""
+        for pointName in points:
+            point = points.get(pointName)
+            point = np.matrix(point)+np.matrix([offset])
+            temp += '"'+pointName+'":'+str(projectPoint(point, angle, offset, scale))+','
+        projectedPoints = json.loads('{'+temp[:-1]+'}')
+        lines = data.get("lines")
+        if lines:
+            for line in lines:
+                for p1name in line:
+                    p1 = p1name
+                p2 = projectedPoints.get(line.get(p1))
+                p1 = projectedPoints.get(p1)
+                drawLine(p1, p2, screen)
+    objects = data.get("objects")
+    if objects:
+        for obj in objects:
+                renderObject(obj.get("objectPath"), np.squeeze(np.array(np.matrix(obj.get("offset"))+np.matrix(offset)*scale/obj.get("scale"))) ,np.squeeze(np.array(np.matrix(obj["angle"])+ angle)), obj.get("scale"), screen)
 
 
 screen = pygame.display.set_mode((WIDTH, HEIGHT))
@@ -97,7 +97,8 @@ while True:
     angle += 0.01
     screen.fill(WHITE)
 
-    renderObject("objects/cube.json", [0, 0, 0], [angle, angle, angle], scale, screen)
+    renderObject("objects/2squares.json", [0, 0, 0], [angle, angle, angle], scale, screen)
+    renderObject("objects/square.json", [0, 0, 1], [angle, angle, angle], scale, screen)
 
 
     pygame.display.update()
