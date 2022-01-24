@@ -7,7 +7,9 @@ Now, lets take a look at the structure which we define each object:
  - Angle: [rotationX, rotationY, rotationZ] - All rotation angles are in radians
  - Offset: [x, y, z] - The offset between the middle of the scene and an object. If used to define an object, then offset from the original object.
  - Scale: Length of each unit.
-
+## Usage
+Type your code in the area between the red lines.
+![code example](examples/code.png)
 ## Config
  - ### **Defining points**
 You can define points in the following structure:
